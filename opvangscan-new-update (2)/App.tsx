@@ -1,43 +1,47 @@
-const syncToCloud = useCallback(async (currStudents: Student[], currRecords: AttendanceRecord[], currPricing: PricingConfig) => {
-  const targetUrl = currentSchoolConfig?.syncUrl;
-  const targetKey = currentSchoolConfig?.syncKey;
-  if (!targetUrl) return;
-  
-  setCloud(prev => ({ ...prev, isSyncing: true }));
-  try {
-    const appData: AppData = { students: currStudents, records: currRecords, pricing: currPricing, version: Date.now() };
-    
-    // ✅ Verwijder 'no-cors' - laat de browser normale CORS checks doen
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: targetKey, action: 'save', data: appData })
-    });
-    
-    // ✅ Check of de response OK is
-    if (!response.ok) {
-      throw new Error(`Server antwoord: ${response.status} ${response.statusText}`);
-    }
-    
-    // ✅ Probeer het antwoord te parsen
-    let result;
-    try {
-      result = await response.json();
-    } catch (parseErr) {
-      console.warn('Google Apps Script antwoord is geen JSON', response.statusText);
-      result = { success: response.ok };
-    }
-    
-    if (result.success === false) {
-      throw new Error(result.error || 'Server gaf fout');
-    }
-    
-    console.log('✅ Data succesvol opgeslagen:', { students: currStudents.length, records: currRecords.length });
-    setCloud(prev => ({ ...prev, isSyncing: false, isConnected: true, lastSync: new Date().toISOString() }));
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Sync mislukt';
-    console.error('❌ Sync fout:', errorMsg);
-    setCloud(prev => ({ ...prev, isSyncing: false, error: errorMsg })); 
-  }
+import React, { useEffect } from 'react';
+
+const App = () => {
+    useEffect(() => {
+        syncToCloud();
+        fetchFromCloud();
+    }, []);
+
+    const syncToCloud = async () => {
+        try {
+            // Sync logic here
+            console.log('Starting sync to cloud...');
+            const response = await fetch('https://your-cloud-api/sync', { method: 'POST' });
+            if (!response.ok) {
+                throw new Error(`Sync failed: ${response.statusText}`);
+            }
+            console.log('Sync to cloud successful.');
+        } catch (error) {
+            console.error('Error during sync to cloud:', error);
+        }
+    };
+
+    const fetchFromCloud = async () => {
+        try {
+            // Fetch logic here
+            console.log('Fetching data from cloud...');
+            const response = await fetch('https://your-cloud-api/fetch');
+            if (!response.ok) {
+                throw new Error(`Fetch failed: ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log('Fetch from cloud successful:', data);
+        } catch (error) {
+            console.error('Error during fetch from cloud:', error);
+        }
+    };
+
+    return (
+        <div>
+            <h1>Opvangscanner App</h1>
+        </div>
+    );
+};
+
+export default App;
 }, [currentSchoolConfig]);
 }
