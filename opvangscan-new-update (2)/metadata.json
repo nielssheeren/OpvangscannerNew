@@ -1,0 +1,7 @@
+{
+  "name": "OpvangScan new update",
+  "description": "Een systeem voor de registratie van kinderen in de voor- en naschoolse opvang met QR-scanning en Excel-import.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
